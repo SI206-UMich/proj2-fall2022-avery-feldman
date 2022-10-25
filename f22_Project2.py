@@ -25,6 +25,37 @@ def get_listings_from_search_results(html_file):
         ('Loft in Mission District', 210, '1944564'),  # example
     ]
     """
+    tuple_lst = []
+    rough_id_lst = []
+    id_lst = []
+    price_lst = []
+    name_lst = []
+    soup = BeautifulSoup(open(html_file), "html.parser")
+    id_soup = soup.find_all("meta", itemprop="url")
+    name_soup = soup.find_all("div", class_ = "t1jojoys dir dir-ltr")
+    price_soup = soup.find_all("span", class_ = "_tyxjp1")
+    #x = soup.find_all("div", itemprop="itemListElement")
+
+    #x = soup.find_all("div", class_="c1l1h97y dir dir-ltr")
+    #print(x)
+    for item in id_soup:
+        rough_id_lst.append(item.get("content"))
+
+    for item in rough_id_lst:
+        item = item.split("?")
+        id_lst.append((item[0].replace("plus/", "").replace("www.airbnb.com/rooms/", "")))
+        
+    for name in name_soup:
+        name_lst.append(name.text)
+
+    for price in price_soup:
+        price_lst.append(int(price.text.strip("$")))
+
+    for index in range(len(name_lst)):
+        tuple_lst.append((name_lst[index], price_lst[index], id_lst[index]))
+
+    return tuple_lst
+
     pass
 
 
