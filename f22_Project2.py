@@ -30,14 +30,13 @@ def get_listings_from_search_results(html_file):
     id_lst = []
     price_lst = []
     name_lst = []
-    soup = BeautifulSoup(open(html_file), "html.parser")
+    f = open(html_file)
+    soup = BeautifulSoup(f, "html.parser")
+    f.close()
     id_soup = soup.find_all("meta", itemprop="url")
     name_soup = soup.find_all("div", class_ = "t1jojoys dir dir-ltr")
     price_soup = soup.find_all("span", class_ = "_tyxjp1")
-    #x = soup.find_all("div", itemprop="itemListElement")
-
-    #x = soup.find_all("div", class_="c1l1h97y dir dir-ltr")
-    #print(x)
+ 
     for item in id_soup:
         rough_id_lst.append(item.get("content"))
 
@@ -83,8 +82,16 @@ def get_listing_information(listing_id):
         number of bedrooms
     )
     """
+    print(listing_id)
+    f = open("html_files/listing_" + listing_id + ".html")
+     
+    soup = BeautifulSoup(f, "html.parser")
+    f.close()
+    policy_nums = soup.find_all("li", class_="f19phm7j dir dir-ltr")
+    print(policy_nums)
     pass
 
+get_listing_information("23672181")
 
 def get_detailed_listing_database(html_file):
     """
@@ -178,10 +185,13 @@ class TestCases(unittest.TestCase):
         # check that the variable you saved after calling the function is a list
         self.assertEqual(type(listings), list)
         # check that each item in the list is a tuple
-
+        for item in listings:
+            self.assertEqual(type(item), tuple)
         # check that the first title, cost, and listing id tuple is correct (open the search results html and find it)
-
+        self.assertEqual(listings[0],('Loft in Mission District', 210, '1944564'))
         # check that the last title is correct (open the search results html and find it)
+        self.assertEqual(listings[-1],('Guest suite in Mission District', 238, '32871760'))
+
         pass
 
     def test_get_listing_information(self):
