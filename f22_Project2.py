@@ -82,16 +82,48 @@ def get_listing_information(listing_id):
         number of bedrooms
     )
     """
-    print(listing_id)
-    f = open("html_files/listing_" + listing_id + ".html")
-     
+    html_file = "html_files/listing_" + listing_id + ".html"
+
+    f = open(html_file, encoding="utf-8")
     soup = BeautifulSoup(f, "html.parser")
     f.close()
-    policy_nums = soup.find_all("li", class_="f19phm7j dir dir-ltr")
-    print(policy_nums)
-    pass
 
-get_listing_information("23672181")
+    policy_lst = []
+    place_lst = []
+    bedroom_lst = []
+
+    policy_nums = soup.find_all("li", class_="f19phm7j dir dir-ltr")
+    for tag in policy_nums:
+        if "Policy number" in tag.text:
+            if "pending" in tag.text.lower():
+                policy_lst.append("Pending")
+            elif any(char.isdigit() for char in tag.text.lower()):
+                policy_lst.append(tag.text.replace("Policy number: ",""))
+            else:
+                policy_lst.append("Exempt")
+
+    place_type = soup.find_all("h2", class_="_14i3z6h")
+    for tag in place_type:
+        if "shared" in tag.text.lower():
+            place_lst.append("Entire Room")
+            break
+        elif "private" in tag.text.lower():
+            place_lst.append("Private Room")
+            break
+        else:
+            place_lst.append("Entire Room")
+            break
+
+    bedroom_amount = soup.find_all("li", class_="l7n4lsf dir dir-ltr")
+    for tag in bedroom_amount:
+        if "bedroom" in tag.text.lower():
+            bedroom_lst.append(int(tag.text.replace(" · ", "").split()[0]))
+        elif "studio" in tag.text.lower():
+            bedroom_lst.append(1)
+    
+    return((policy_lst[0], place_lst[0], bedroom_lst[0]))
+
+    pass
 
 def get_detailed_listing_database(html_file):
     """
@@ -99,7 +131,7 @@ def get_detailed_listing_database(html_file):
     the complete listing information using the functions you’ve created.
     This function takes in a variable representing the location of the search results html file.
     The return value should be in this format:
-
+    
 
     [
         (Listing Title 1,Cost 1,Listing ID 1,Policy Number 1,Place Type 1,Number of Bedrooms 1),
@@ -107,8 +139,14 @@ def get_detailed_listing_database(html_file):
         ...
     ]
     """
-    pass
+    lst = []
+    lst_of_tuples = get_listings_from_search_results(html_file)
+    for tuple in lst_of_tuples:
+        listing_info = (get_listing_information(tuple[2]))
+        lst.append((tuple[0], tuple[1], tuple[2], listing_info[0], listing_info[1], listing_info[2]))
+    return lst
 
+    pass
 
 def write_csv(data, filename):
     """
@@ -215,10 +253,12 @@ class TestCases(unittest.TestCase):
             # check that the third element in the tuple is an int
             self.assertEqual(type(listing_information[2]), int)
         # check that the first listing in the html_list has policy number 'STR-0001541'
-
+        self.assertEqual(get_listing_information(html_list[0])[0],"STR-0001541")
         # check that the last listing in the html_list is a "Private Room"
-
+        self.assertEqual(get_listing_information(html_list[-1])[1],"Private Room")
         # check that the third listing has one bedroom
+        self.assertEqual(get_listing_information(html_list[2])[-1],1)
+
 
         pass
 
@@ -232,12 +272,14 @@ class TestCases(unittest.TestCase):
             # assert each item in the list of listings is a tuple
             self.assertEqual(type(item), tuple)
             # check that each tuple has a length of 6
-
+            self.assertEqual(len(item),6)
         # check that the first tuple is made up of the following:
         # 'Loft in Mission District', 210, '1944564', '2022-004088STR', 'Entire Room', 1
-
+        self.assertEqual(detailed_database[0],('Loft in Mission District', 210, '1944564', '2022-004088STR', 'Entire Room', 1))
         # check that the last tuple is made up of the following:
         # 'Guest suite in Mission District', 238, '32871760', 'STR-0004707', 'Entire Room', 1
+        self.assertEqual(detailed_database[-1],('Guest suite in Mission District', 238, '32871760', 'STR-0004707', 'Entire Room', 1))
+
 
         pass
 
