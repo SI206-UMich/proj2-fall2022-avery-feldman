@@ -297,7 +297,6 @@ class TestCases(unittest.TestCase):
         # check that the third listing has one bedroom
         self.assertEqual(get_listing_information(html_list[2])[-1],1)
 
-
         pass
 
     def test_get_detailed_listing_database(self):
