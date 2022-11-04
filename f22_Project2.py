@@ -356,8 +356,8 @@ class TestCases(unittest.TestCase):
         self.assertIsInstance(invalid_listings[0],str)
         # check that the first element in the list is '16204265'
         self.assertEqual(invalid_listings[0],"16204265")
-        pass
 
+        pass
 
 if __name__ == '__main__':
     database = get_detailed_listing_database("html_files/mission_district_search_results.html")
