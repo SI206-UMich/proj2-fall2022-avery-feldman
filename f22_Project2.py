@@ -170,8 +170,18 @@ def write_csv(data, filename):
 
     This function should not return anything.
     """
+    sorted_lst = sorted(data, key = lambda x : x[1])
+    f = open(filename, "w")
+    f.write("Listing Title,Cost,Listing ID,Policy Number,Place Type,Number of Bedrooms")
+    for tuple in sorted_lst:
+        f.write("\n")
+        for item in tuple:
+            if item == tuple[-1]:
+                f.write(str(item))
+            else:
+                f.write(str(item) +",")
+    f.close()
     pass
-
 
 def check_policy_numbers(data):
     """
@@ -192,6 +202,14 @@ def check_policy_numbers(data):
     ]
 
     """
+    lst = []
+    for tuple in data:
+        if tuple[3] != "Pending" and tuple[3] != "Exempt":
+            if re.search("20[0-9]{2}-00[0-9]{4}STR", tuple[3]) or re.search("STR-000[0-9]{4}", tuple[3]):
+                continue
+            else:
+                lst.append(tuple[2])
+    return lst
     pass
 
 
@@ -209,8 +227,28 @@ def extra_credit(listing_id):
     gone over their 90 day limit, else return True, indicating the lister has
     never gone over their limit.
     """
-    pass
+    html_file = "html_files/listing_" + listing_id + "_reviews.html"
 
+    f = open(html_file, encoding="utf-8")
+    soup = BeautifulSoup(f, "html.parser")
+    f.close()
+
+    dictionary = {}
+
+    x = soup.find_all("li", class_="_1f1oir5")
+    for tag in x:
+        date = tag.text
+        year = date.split()[-1]
+        if year not in dictionary:
+            dictionary[year] = 1
+        else:
+            dictionary[year] += 1
+    
+    for value in dictionary.values():
+        if value > 90:
+            return False
+    return True
+    pass
 
 class TestCases(unittest.TestCase):
 
@@ -280,7 +318,6 @@ class TestCases(unittest.TestCase):
         # 'Guest suite in Mission District', 238, '32871760', 'STR-0004707', 'Entire Room', 1
         self.assertEqual(detailed_database[-1],('Guest suite in Mission District', 238, '32871760', 'STR-0004707', 'Entire Room', 1))
 
-
         pass
 
     def test_write_csv(self):
@@ -298,10 +335,11 @@ class TestCases(unittest.TestCase):
         # check that there are 21 lines in the csv
         self.assertEqual(len(csv_lines), 21)
         # check that the header row is correct
-
+        self.assertEqual(csv_lines[0],['Listing Title', 'Cost', 'Listing ID', 'Policy Number', 'Place Type', 'Number of Bedrooms'])
         # check that the next row is Private room in Mission District,82,51027324,Pending,Private Room,1
-
+        self.assertEqual(csv_lines[1],['Private room in Mission District', '82', '51027324', 'Pending', 'Private Room', '1'])
         # check that the last row is Apartment in Mission District,399,28668414,Pending,Entire Room,2
+        self.assertEqual(csv_lines[-1],['Apartment in Mission District', '399', '28668414', 'Pending', 'Entire Room', '2'])
 
         pass
 
@@ -314,10 +352,11 @@ class TestCases(unittest.TestCase):
         # check that the return value is a list
         self.assertEqual(type(invalid_listings), list)
         # check that there is exactly one element in the string
-
+        self.assertEqual(len(invalid_listings), 1)
         # check that the element in the list is a string
-
+        self.assertIsInstance(invalid_listings[0],str)
         # check that the first element in the list is '16204265'
+        self.assertEqual(invalid_listings[0],"16204265")
         pass
 
 
