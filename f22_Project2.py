@@ -1,3 +1,8 @@
+# Your name: Avery Feldman
+# Your student id: 83844944
+# Your email: averylf@umich.edu
+# List who you have worked with on this project:
+
 from xml.sax import parseString
 from bs4 import BeautifulSoup
 import re
